@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>svg</title>
+        <meta name="description" content="Interaktywny">
+        
+    </head>
+    <body onload="init()" ><style>
+        .full {width: 100%; height: 100%;}
+        .full {position: absolute; top: 0; left: 0;}
+        .container {
+            position: absolute;
+            top: 80px;
+            left: 80px;
+            width: 300px;
+            height: 300px;
+            border: 3px solid #73AD21;
+            
+        }
+        
+        </style>
+        <script>
+            var settings={
+                svgSize:{
+                    x:700,
+                    y:300
+                },
+                svgPadding:{
+                    x:80,
+                    y:80
+                },
+                viewBox:{
+                    min_x:0,
+                    min_y:0,
+                    width:300,
+                    height:8000
+                },
+                pos:{
+                    begin:[0,0],
+                    end:[0,0],
+                    startPoint:false
+                }
+                
+                
+            }
+            function init(){
+                svgSize(settings.svgSize.x,settings.svgSize.y);
+                svgPadding(settings.svgPadding.x,settings.svgPadding.y);
+                changeViewbox();
+                prepare();
+                //var x=posInSvgScale();
+                //changePath();
+            }
+            function svgPadding(x,y){
+                var div = document.getElementById("svgContainer");
+                div.style.top=x+'px';
+                div.style.left=y+'px';
+            }
+            function svgSize(width,height){
+                var div = document.getElementById("svgContainer");
+                div.style.width=width+'px';
+                div.style.height=height+'px';
+                var shape=document.getElementById("svg");
+                shape.setAttribute("width", width);
+                shape.setAttribute("height", height);
+                
+                
+            }
+            function changePath(path){
+                document.getElementById("pointer").setAttribute("d",path);
+                
+            }
+            function posInSvgScale(){
+                var x = event.clientX;
+                var y = event.clientY;
+                console.log(x);
+                console.log(y);
+                //changeViewbox(someTest);
+                var is=inSvg(x,y);
+                if(is == true){
+                    var pads=settings.svgPadding;
+                    var viewBox=settings.viewBox;
+                    var xPos=(x-pads.x)*viewBox.width/settings.svgSize.x+viewBox.min_x;
+                    var yPos=(y-pads.y)*viewBox.height/settings.svgSize.y+viewBox.min_y;
+                    //console.log(xPos);
+                    return [true,xPos,yPos];
+                }
+                else{ return[false];}
+                
+                
+            }
+            function getMousePosition(){
+                var is=posInSvgScale();
+                if(is[0] == true){
+                    //var pads=settings.svgPadding;
+                    //var viewBox=settings.viewBox;
+                    //var xPos=(x-pads.x)*viewBox.width/settings.svgSize.x+viewBox.min_x;
+                    //var yPos=(y-pads.y)*viewBox.height/settings.svgSize.y+viewBox.min_y;
+                    //var pos=settings.pos;
+                    addPos(is[1],is[2]);
+                   // console.log(pos);
+                    var svgEl=point(is[1],is[2]);
+                    addElementToSvg(svgEl);
+                    
+                }
+                //var coords = "X coords: " + x + ", Y coords: " + y;
+                //console.log(coords);
+            }
+            function point(cx,cy){
+                return '<circle cx="'+cx+'" cy="'+cy+'" r="1" stroke="black" stroke-width="1" fill="red" />';
+            }
+            function move(){
+                var x=posInSvgScale();
+                var pos = settings.pos;
+                var points = "M"+pos.begin[0] +" "+pos.begin[1];
+                points+=" H"+x[1]+ " V"+x[2] +" H"+pos.begin[0]+ " Z";
+                //console.log(points);
+                changePath(points);
+                
+                //console.log("im here");
+            }
+            function addPos(posX,posY){
+                var element=document.getElementById("svgContainer");
+                var pos=settings.pos;
+                if(pos.startPoint==false){
+                    pos.begin=[posX,posY];
+                    pos.startPoint=true;
+                    element.addEventListener("mousemove", move, false);
+                }
+                else{
+                    pos.end=[posX,posY];
+                    pos.startPoint=false;
+                    element.removeEventListener("mousemove", move, false);
+                    prepareViewbox();
+                    //do some stuff
+                    pos={begin:[0,0],end:[0,0],startPoint:false};
+                }
+            }
+            function prepareViewbox(){
+                var pos=settings.pos;
+                var min_x=Math.min(pos.begin[0],pos.end[0]);
+                var min_y=Math.min(pos.end[1],pos.begin[1]);
+                var width=Math.abs(pos.end[0]-pos.begin[0]);
+                var height=Math.abs(pos.end[1]-pos.begin[1]);
+                var diff;
+                var set=settings.svgSize;
+                if(set.width-width>set.height-height){
+                    diff=width*300/700-height;
+                    min_y-=diff/2;
+                    height+=diff;
+                }
+                else{
+                    diff=height*700/300-width;
+                    min_x-=diff/2;
+                    width+=diff;
+                }
+                settings.viewBox={
+                    min_x:min_x,
+                    min_y:min_y,
+                    width:width,
+                    height:height
+                }
+                changeViewbox();
+            }
+            function prepare(){
+                var pos=settings.pos;
+                var min_x=0;
+                var min_y=0;
+                var width=settings.viewBox.width;
+                var height=settings.viewBox.height;
+                var diff;
+                var set=settings.svgSize;
+                if(set.x-width<set.y-height){
+                    diff=width*set.y/set.x-height;
+                    min_y-=diff/2;
+                    height+=diff;
+                }
+                else{
+                    diff=height*set.x/set.y-width;
+                    min_x-=diff/2;
+                    width+=diff;
+                }
+                settings.viewBox={
+                    min_x:min_x,
+                    min_y:min_y,
+                    width:width,
+                    height:height
+                }
+                changeViewbox();
+            }
+            function inSvg(posX,posY){
+                var status=false; //to change
+                if(posX > settings.svgPadding.x && posX < settings.svgPadding.x+settings.svgSize.x){
+                    if (posY >settings.svgPadding.x && posY < settings.svgPadding.y+settings.svgSize.y){
+                        status=true;
+                    }
+                    
+                }
+                return status;
+            }
+            function addElementToSvg(el){
+                var elem=document.getElementById("svg");
+                elem.innerHTML+=el;            
+            }
+            function changeViewbox(){
+                points=settings.viewBox;
+                var viewPos=""+points.min_x+" "+points.min_y+" "+points.width+" "+points.height;
+                var shape=document.getElementById("svg");
+                shape.setAttribute("viewBox", viewPos);
+                
+            }
+        </script>
+ 
+        <div class="full" id="hey" onclick="getMousePosition()" >Hey
+            <div class="container" id="svgContainer">
+                <svg width="300" height="300" id="svg">
+                <path id='pointer' d="" stroke="red" stroke-width="1" fill="none"/>
+                <path id="" d="M0 0 L0 308 L5 304 L10 312 L15 324 L20 304 L25 316 L30 312 L35 324 L40 312 L45 320 L50 328 L55 320 L60 316 L65 332 L70 312 L75 328 L80 324 L85 344 L90 328 L95 324 L100 320 L105 328 L110 340 L115 324 L120 328 L125 340 L130 336 L135 316 L140 336 L145 348 L150 332 L155 344 L160 340 L165 344 L170 348 L175 352 L180 352 L185 344 L190 360 L195 348 L200 344 L205 324 L210 316 L215 324 L220 308 L225 296 L230 288 L235 284 L240 264 L245 276 L250 272 L255 256 L260 256 L265 252 L270 256 L275 256 L280 260 L285 264 L290 260 L295 264 L300 244 L305 260 L310 240 L315 260 L320 256 L325 260 L330 264 L335 264 L340 260 L345 244 L350 256 L355 256 L360 256 L365 260 L370 244 L375 252 L380 236 L385 248 L390 240 L395 244 L400 240 L405 260 L410 256 L415 244 L420 260 L425 252 L430 260 L435 256 L440 244 L445 256 L450 244 L455 256 L460 260 L465 256 L470 248 L475 260 L480 256 L485 264 L490 272 L495 276 L500 272 L505 276 L510 264 L515 280 L520 256 L525 284 L530 280 L535 268 L540 264 L545 256 L550 280 L555 276 L560 280 L565 276 L570 292 L575 280 L580 300 L585 284 L590 292 L595 288 L600 300 L605 300 L610 308 L615 296 L620 292 L625 296 L630 304 L635 312 L640 308 L645 316 L650 316 L655 304 L660 328 L665 312 L670 324 L675 320 L680 324 L685 316 L690 316 L695 336 L700 344 L705 332 L710 328 L715 340 L720 332 L725 344 L730 332 L735 336 L740 324 L745 324 L750 316 L755 296 L760 280 L765 272 L770 276 L775 264 L780 268 L785 264 L790 260 L795 248 L800 252 L805 248 L810 248 L815 244 L820 252 L825 256 L830 240 L835 252 L840 264 L845 260 L850 252 L855 248 L860 260 L865 264 L870 272 L875 260 L880 268 L885 260 L890 260 L895 260 L900 260 L905 256 L910 264 L915 248 L920 244 L925 248 L930 268 L935 252 L940 256 L945 252 L950 264 L955 244 L960 260 L965 264 L970 260 L975 252 L980 260 L985 272 L990 264 L995 264 L1000 256 L1005 268 L1010 268 L1015 264 L1020 284 L1025 280 L1030 276 L1035 268 L1040 268 L1045 284 L1050 276 L1055 284 L1060 280 L1065 284 L1070 292 L1075 292 L1080 276 L1085 288 L1090 288 L1095 304 L1100 304 L1105 308 L1110 292 L1115 292 L1120 312 L1125 316 L1130 320 L1135 304 L1140 308 L1145 308 L1150 304 L1155 308 L1160 312 L1165 312 L1170 316 L1175 316 L1180 304 L1185 308 L1190 320 L1195 328 L1200 336 L1205 324 L1210 328 L1215 328 L1220 336 L1225 332 L1230 332 L1235 344 L1240 320 L1245 320 L1250 308 L1255 308 L1260 304 L1265 304 L1270 296 L1275 288 L1280 260 L1285 268 L1290 272 L1295 260 L1300 268 L1305 272 L1310 252 L1315 264 L1320 260 L1325 264 L1330 276 L1335 272 L1340 276 L1345 268 L1350 264 L1355 264 L1360 264 L1365 288 L1370 276 L1375 272 L1380 268 L1385 268 L1390 272 L1395 268 L1400 268 L1405 276 L1410 276 L1415 264 L1420 264 L1425 264 L1430 272 L1435 260 L1440 268 L1445 272 L1450 260 L1455 264 L1460 264 L1465 280 L1470 264 L1475 284 L1480 264 L1485 268 L1490 272 L1495 284 L1500 284 L1505 280 L1510 272 L1515 280 L1520 280 L1525 284 L1530 284 L1535 296 L1540 284 L1545 296 L1550 284 L1555 284 L1560 292 L1565 288 L1570 296 L1575 296 L1580 296 L1585 312 L1590 300 L1595 300 L1600 316 L1605 312 L1610 300 L1615 300 L1620 296 L1625 316 L1630 308 L1635 312 L1640 300 L1645 324 L1650 312 L1655 332 L1660 332 L1665 328 L1670 332 L1675 328 L1680 332 L1685 340 L1690 328 L1695 336 L1700 332 L1705 336 L1710 336 L1715 332 L1720 344 L1725 332 L1730 336 L1735 340 L1740 356 L1745 348 L1750 352 L1755 340 L1760 336 L1765 340 L1770 324 L1775 336 L1780 304 L1785 296 L1790 304 L1795 296 L1800 284 L1805 268 L1810 264 L1815 268 L1820 276 L1825 260 L1830 268 L1835 276 L1840 260 L1845 280 L1850 276 L1855 276 L1860 276 L1865 264 L1870 264 L1875 276 L1880 280 L1885 272 L1890 276 L1895 276 L1900 272 L1905 272 L1910 272 L1915 280 L1920 268 L1925 260 L1930 264 L1935 264 L1940 260 L1945 268 L1950 260 L1955 256 L1960 272 L1965 260 L1970 260 L1975 276 L1980 276 L1985 264 L1990 268 L1995 280 L2000 268 L2005 260 L2010 276 L2015 284 L2020 288 L2025 280 L2030 280 L2035 284 L2040 276 L2045 280 L2050 284 L2055 280 L2060 280 L2065 288 L2070 292 L2075 284 L2080 276 L2085 296 L2090 308 L2095 284 L2100 284 L2105 284 L2110 292 L2115 288 L2120 296 L2125 292 L2130 292 L2135 292 L2140 304 L2145 308 L2150 292 L2155 296 L2160 292 L2165 312 L2170 312 L2175 316 L2180 320 L2185 312 L2190 304 L2195 312 L2200 308 L2205 312 L2210 304 L2215 308 L2220 320 L2225 312 L2230 308 L2235 320 L2240 308 L2245 316 L2250 316 L2255 328 L2260 324 L2265 324 L2270 328 L2275 328 L2280 312 L2285 316 L2290 316 L2295 320 L2300 316 L2305 320 L2310 312 L2315 296 L2320 296 L2325 276 L2330 260 L2335 260 L2340 244 L2345 240 L2350 220 L2355 216 L2360 244 L2365 228 L2370 220 L2375 220 L2380 228 L2385 220 L2390 216 L2395 220 L2400 228 L2405 220 L2410 224 L2415 220 L2420 220 L2425 228 L2430 232 L2435 228 L2440 208 L2445 196 L2450 200 L2455 220 L2460 228 L2465 220 L2470 200 L2475 200 L2480 208 L2485 200 L2490 208 L2495 208 L2500 200 L2505 192 L2510 224 L2515 220 L2520 220 L2525 212 L2530 216 L2535 212 L2540 224 L2545 228 L2550 208 L2555 216 L2560 232 L2565 224 L2570 212 L2575 220 L2580 248 L2585 220 L2590 228 L2595 220 L2600 228 L2605 228 L2610 228 L2615 232 L2620 244 L2625 232 L2630 220 L2635 244 L2640 228 L2645 240 L2650 240 L2655 244 L2660 248 L2665 236 L2670 236 L2675 244 L2680 252 L2685 244 L2690 248 L2695 264 L2700 260 L2705 260 L2710 256 L2715 252 L2720 260 L2725 272 L2730 268 L2735 272 L2740 272 L2745 264 L2750 268 L2755 280 L2760 272 L2765 284 L2770 276 L2775 276 L2780 280 L2785 280 L2790 288 L2795 280 L2800 280 L2805 288 L2810 300 L2815 280 L2820 304 L2825 304 L2830 300 L2835 296 L2840 268 L2845 264 L2850 244 L2855 248 L2860 232 L2865 252 L2870 224 L2875 216 L2880 236 L2885 212 L2890 224 L2895 220 L2900 232 L2905 224 L2910 220 L2915 228 L2920 220 L2925 240 L2930 236 L2935 220 L2940 232 L2945 232 L2950 228 L2955 244 L2960 224 L2965 232 L2970 240 L2975 244 L2980 228 L2985 236 L2990 236 L2995 212 L3000 228 L3005 240 L3010 212 L3015 212 L3020 224 L3025 216 L3030 224 L3035 232 L3040 244 L3045 224 L3050 224 L3055 232 L3060 244 L3065 236 L3070 256 L3075 256 L3080 252 L3085 248 L3090 240 L3095 236 L3100 244 L3105 236 L3110 240 L3115 248 L3120 244 L3125 244 L3130 268 L3135 252 L3140 256 L3145 256 L3150 260 L3155 248 L3160 248 L3165 256 L3170 264 L3175 268 L3180 268 L3185 256 L3190 268 L3195 260 L3200 280 L3205 272 L3210 268 L3215 264 L3220 280 L3225 284 L3230 284 L3235 280 L3240 284 L3245 284 L3250 300 L3255 280 L3260 280 L3265 280 L3270 296 L3275 280 L3280 292 L3285 296 L3290 292 L3295 300 L3300 288 L3305 316 L3310 304 L3315 308 L3320 292 L3325 312 L3330 312 L3335 320 L3340 312 L3345 312 L3350 308 L3355 316 L3360 304 L3365 316 L3370 304 L3375 296 L3380 300 L3385 284 L3390 272 L3395 268 L3400 268 L3405 248 L3410 232 L3415 240 L3420 248 L3425 240 L3430 228 L3435 228 L3440 224 L3445 228 L3450 236 L3455 244 L3460 224 L3465 236 L3470 212 L3475 232 L3480 208 L3485 224 L3490 228 L3495 220 L3500 228 L3505 212 L3510 220 L3515 224 L3520 212 L3525 224 L3530 224 L3535 212 L3540 228 L3545 216 L3550 216 L3555 216 L3560 224 L3565 228 L3570 224 L3575 212 L3580 228 L3585 224 L3590 224 L3595 224 L3600 220 L3605 212 L3610 224 L3615 228 L3620 240 L3625 228 L3630 224 L3635 232 L3640 232 L3645 236 L3650 252 L3655 244 L3660 244 L3665 232 L3670 224 L3675 232 L3680 232 L3685 236 L3690 236 L3695 248 L3700 236 L3705 256 L3710 248 L3715 260 L3720 260 L3725 236 L3730 252 L3735 252 L3740 256 L3745 264 L3750 252 L3755 260 L3760 256 L3765 256 L3770 252 L3775 264 L3780 260 L3785 268 L3790 272 L3795 268 L3800 260 L3805 272 L3810 276 L3815 272 L3820 284 L3825 280 L3830 272 L3835 280 L3840 276 L3845 288 L3850 292 L3855 292 L3860 284 L3865 292 L3870 296 L3875 300 L3880 292 L3885 280 L3890 284 L3895 316 L3900 288 L3905 284 L3910 296 L3915 308 L3920 300 L3925 304 L3930 316 L3935 308 L3940 320 L3945 300 L3950 312 L3955 288 L3960 292 L3965 272 L3970 272 L3975 260 L3980 252 L3985 232 L3990 240 L3995 236 L4000 228 L4005 224 L4010 224 L4015 228 L4020 216 L4025 228 L4030 232 L4035 216 L4040 220 L4045 232 L4050 216 L4055 216 L4060 208 L4065 204 L4070 220 L4075 216 L4080 208 L4085 224 L4090 212 L4095 208 L4100 208 L4105 228 L4110 204 L4115 212 L4120 216 L4125 212 L4130 208 L4135 200 L4140 196 L4145 208 L4150 200 L4155 208 L4160 196 L4165 212 L4170 196 L4175 212 L4180 208 L4185 216 L4190 212 L4195 228 L4200 224 L4205 224 L4210 224 L4215 224 L4220 232 L4225 236 L4230 228 L4235 232 L4240 228 L4245 232 L4250 232 L4255 224 L4260 228 L4265 232 L4270 256 L4275 240 L4280 228 L4285 232 L4290 236 L4295 244 L4300 236 L4305 252 L4310 248 L4315 260 L4320 256 L4325 256 L4330 252 L4335 260 L4340 248 L4345 272 L4350 260 L4355 264 L4360 268 L4365 264 L4370 268 L4375 272 L4380 268 L4385 264 L4390 272 L4395 260 L4400 272 L4405 276 L4410 280 L4415 276 L4420 280 L4425 296 L4430 288 L4435 284 L4440 280 L4445 284 L4450 284 L4455 284 L4460 276 L4465 296 L4470 296 L4475 288 L4480 272 L4485 276 L4490 280 L4495 276 L4500 240 L4505 256 L4510 232 L4515 228 L4520 220 L4525 204 L4530 216 L4535 228 L4540 228 L4545 224 L4550 224 L4555 216 L4560 220 L4565 212 L4570 212 L4575 212 L4580 216 L4585 224 L4590 220 L4595 216 L4600 212 L4605 224 L4610 208 L4615 204 L4620 212 L4625 216 L4630 216 L4635 204 L4640 204 L4645 208 L4650 204 L4655 208 L4660 208 L4665 204 L4670 208 L4675 212 L4680 220 L4685 208 L4690 204 L4695 208 L4700 212 L4705 204 L4710 204 L4715 200 L4720 216 L4725 200 L4730 204 L4735 228 L4740 216 L4745 224 L4750 236 L4755 216 L4760 224 L4765 236 L4770 224 L4775 228 L4780 232 L4785 220 L4790 236 L4795 224 L4800 244 L4805 228 L4810 236 L4815 220 L4820 232 L4825 244 L4830 236 L4835 236 L4840 228 L4845 236 L4850 240 L4855 244 L4860 244 L4865 260 L4870 256 L4875 256 L4880 256 L4885 260 L4890 248 L4895 248 L4900 268 L4905 264 L4910 256 L4915 268 L4920 256 L4925 256 L4930 256 L4935 276 L4940 288 L4945 272 L4950 272 L4955 276 L4960 264 L4965 264 L4970 276 L4975 280 L4980 300 L4985 292 L4990 284 L4995 276 L5000 276 L5005 288 L5010 284 L5015 288 L5020 296 L5025 304 L5030 292 L5035 296 L5040 312 L5045 288 L5050 288 L5055 280 L5060 284 L5065 280 L5070 272 L5075 244 L5080 228 L5085 240 L5090 244 L5095 232 L5100 232 L5105 220 L5110 220 L5115 208 L5120 200 L5125 212 L5130 224 L5135 212 L5140 208 L5145 224 L5150 212 L5155 220 L5160 216 L5165 204 L5170 196 L5175 200 L5180 200 L5185 204 L5190 192 L5195 188 L5200 204 L5205 220 L5210 196 L5215 196 L5220 192 L5225 188 L5230 200 L5235 188 L5240 184 L5245 208 L5250 200 L5255 184 L5260 196 L5265 180 L5270 188 L5275 200 L5280 180 L5285 188 L5290 196 L5295 192 L5300 196 L5305 200 L5310 184 L5315 200 L5320 176 L5325 204 L5330 188 L5335 204 L5340 200 L5345 200 L5350 188 L5355 196 L5360 192 L5365 200 L5370 192 L5375 204 L5380 196 L5385 188 L5390 188 L5395 196 L5400 204 L5405 200 L5410 204 L5415 204 L5420 192 L5425 180 L5430 200 L5435 212 L5440 200 L5445 196 L5450 204 L5455 192 L5460 220 L5465 196 L5470 204 L5475 208 L5480 216 L5485 192 L5490 208 L5495 216 L5500 212 L5505 204 L5510 224 L5515 208 L5520 224 L5525 212 L5530 216 L5535 208 L5540 216 L5545 232 L5550 228 L5555 220 L5560 224 L5565 236 L5570 216 L5575 240 L5580 216 L5585 224 L5590 232 L5595 232 L5600 240 L5605 240 L5610 240 L5615 240 L5620 232 L5625 228 L5630 224 L5635 224 L5640 208 L5645 200 L5650 196 L5655 180 L5660 176 L5665 176 L5670 172 L5675 160 L5680 172 L5685 168 L5690 164 L5695 160 L5700 164 L5705 164 L5710 172 L5715 156 L5720 172 L5725 148 L5730 156 L5735 156 L5740 152 L5745 164 L5750 152 L5755 152 L5760 156 L5765 144 L5770 124 L5775 148 L5780 140 L5785 132 L5790 124 L5795 112 L5800 116 L5805 120 L5810 96 L5815 100 L5820 108 L5825 112 L5830 104 L5835 100 L5840 88 L5845 76 L5850 68 L5855 84 L5860 60 L5865 72 L5870 60 L5875 56 L5880 56 L5885 52 L5890 52 L5895 36 L5900 24 L5905 32 L5910 12 L5915 12 L5920 0" stroke="red" stroke-width="1" fill="none"/>
+                <circle cx="255" cy="176" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="176" cy="199" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="177" cy="107" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="115" cy="97" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="115" cy="116" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="110" cy="130" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="88" cy="130" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="264" cy="235" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="201" cy="242" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="132" cy="256" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="132" cy="200" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="138" cy="183" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="212" cy="166" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="222" cy="114" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="227" cy="84" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="149" cy="59" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="88" cy="55" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="63" cy="76" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="63" cy="132" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="63" cy="184" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="51" cy="93" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="140" cy="55" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="170" cy="36" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="227" cy="36" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="252" cy="55" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="252" cy="68" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="252" cy="86" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="173" cy="90" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="173" cy="232" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="221" cy="181" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="221" cy="200" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="223" cy="220" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="296" cy="231" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="291" cy="139" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="266" cy="139" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="286" cy="44" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="251" cy="27" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="226" cy="26" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="208" cy="26" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="176" cy="26" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="170" cy="26" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="167" cy="26" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="101" cy="30" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="83" cy="36" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="50" cy="36" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="50" cy="82" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="50" cy="123" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="75" cy="116" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="85" cy="76" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="96" cy="76" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="122" cy="91" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="122" cy="96" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="128" cy="169" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="99" cy="169" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="95" cy="169" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="95" cy="173" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="95" cy="180" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="99" cy="191" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="102" cy="191" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="102" cy="191" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="114" cy="197" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="114" cy="197" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="114" cy="199" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="114" cy="199" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="114" cy="199" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="103" cy="204" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="95" cy="205" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="95" cy="196" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="95" cy="150" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="95" cy="150" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="114" cy="150" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="183" cy="136" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="183" cy="136" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="196" cy="136" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="238" cy="138" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="238" cy="166" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="238" cy="196" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="238" cy="204" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="219" cy="244" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="131" cy="248" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="47" cy="231" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="47" cy="93" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="47" cy="62" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="98" cy="62" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="125" cy="62" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="175" cy="104" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="170" cy="138" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="171" cy="156" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="171" cy="156" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="225" cy="210" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="281" cy="250" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="269" cy="281" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="125" cy="262" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="75" cy="262" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="75" cy="168" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="44" cy="113" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="48" cy="79" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="70" cy="51" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="70" cy="41" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="104" cy="41" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="127" cy="52" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="184" cy="52" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="187" cy="103" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="105" cy="219" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="161" cy="175" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="126" cy="97" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="205" cy="235" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="170" cy="256" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="205" cy="256" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="205" cy="269" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="217" cy="269" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="263" cy="265" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="263" cy="280" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="252" cy="280" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="252" cy="250" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="183" cy="256" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="181" cy="285" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="106" cy="285" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="46" cy="285" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="46" cy="285" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="32" cy="258" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="32" cy="215" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="32" cy="189" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="24" cy="168" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="24" cy="106" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="24" cy="79" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="24" cy="75" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="27" cy="31" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="70" cy="27" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="98" cy="27" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="117" cy="27" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="138" cy="33" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="147" cy="33" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="184" cy="57" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="192" cy="84" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="151" cy="78" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="151" cy="161" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="156" cy="250" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="210" cy="186" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="209" cy="225" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="282" cy="199" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="283" cy="145" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="264" cy="145" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="264" cy="127" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="291" cy="127" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="291" cy="92" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="268" cy="65" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="279" cy="60" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="270" cy="43" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="284" cy="42" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="284" cy="20" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="262" cy="20" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="256" cy="48" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="242" cy="48" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="220" cy="55" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="216" cy="55" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="216" cy="80" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="216" cy="108" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="243" cy="108" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="243" cy="136" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="232" cy="136" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="223" cy="139" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="223" cy="146" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="170" cy="154" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="170" cy="218" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="195" cy="173" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="195" cy="148" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="124" cy="135" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="139" cy="105" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="139" cy="159" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="145" cy="121" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="193" cy="121" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="211" cy="119" r="1" stroke="green" stroke-width="1" fill="yellow"></circle><circle cx="211" cy="102" r="1" stroke="green" stroke-width="1" fill="yellow"></circle></svg>
+            
+            </div>
+        
+        </div>
+    </body>
+</html>
