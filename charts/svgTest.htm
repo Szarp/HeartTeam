@@ -185,13 +185,13 @@
                 var height=Math.abs(pos.end[1]-pos.begin[1]);
                 var diff;
                 var set=settings.svgSize;
-                if(set.width-width>set.height-height){
-                    diff=width*300/700-height;
+                if(set.x-width<set.y-height){
+                    diff=width*set.y/set.x-height;
                     min_y-=diff/2;
                     height+=diff;
                 }
                 else{
-                    diff=height*700/300-width;
+                    diff=height*set.x/set.y-width;
                     min_x-=diff/2;
                     width+=diff;
                 }
