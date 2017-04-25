@@ -72,16 +72,50 @@ var index=0;
 var last=0;
 var dPath="";
 app.get('/test',function(req,res){
+    ///*
+    readAndRewrite('average.txt',function(tab){
+        var i=1;
+        var last=0;;
+        var mode=0;
+        var a,b =0;
+        do{
+            last=0;
+            a=Math.floor(tab[i]);
+            b=Math.floor(tab[i-1]);
+            if(mode==0){//looking for biggest
+                if(a>b){
+                    mode=1;
+                }
+            }
+            else{
+                if(a<b){
+                    console.log(i);
+                    mode=0;
+                    last=300;
+                }
+            }
+
+            tab[i-2]=last;
+            i++;
+        }while(i<tab.length);
+        saveTable('higher_point.txt',tab,function(){ })
+   })
+   //*/
+        
+   
+    /*
     readAndRewrite('test_min.txt',function(tab){
         var i=1;
         var last;
         do{
             //last=
-            tab[i]=tab[i]*0.01+tab[i-1]*0.99;
+            tab[i]=tab[i]*0.005+tab[i-1]*0.995;
             i++;
         }while(i+1<tab.length);
-        saveTable('ave.txt',tab,function(){ })
+        saveTable('average.txt',tab,function(){ })
     })
+    */
+    /*
     readAndRewrite('test_min.txt',function(tab){
         var i=0;
         do{
@@ -100,103 +134,8 @@ app.get('/test',function(req,res){
             
         })
     })
-    /*
-    readAndRewrite("10s_hr.txt","test.txt",
-    function(line){ //what to do
-        parsedLine=Number(line);
-        if(index==0)
-            last=parsedLine;
-        var min=10108;
-        var point=parsedLine*0.01+last*0.99;
-        dPath+=makePoint(index,point-min);
-        //console.log(parsedLine-min,point);
-        index++;
-        //do some stuff
-        //console.log(parsedLine+";"+last);
-        last=point;
-        return point-min+"\n";
-    },
-    function(a){//callback
-        console.log(a)
-    });
-readAndRewrite("test_min.txt","average.txt",
-    function(line){ //what to do
-        parsedLine=Number(line);
-        table1[table1.length]=parsedLine;
-        //console.log(table1[table1.length-1]);
-        //index++;
-        //do some stuff
-        //console.log(parsedLine+";"+last);
-        //last=point;
-        return 'a'+"\n";
-    },
-    function(a){//callback
-        //console.log(a)
-        var i=0;
-        do{
-            
-            table1[i]=table1[i]*0.99+table1[i+1]*0.01;
-            i++;
-        }while(i+1<table1.length);
-        saveTable('avarage.txt',table1,function(){});
-    });
-
-readAndRewrite("10s_hr.txt","test2.txt",
-    function(line){ //what to do
-        parsedLine=Number(line);
-        table1[table1.length]=parsedLine;
-        //console.log(parsedLine);
-        //index++;
-        //do some stuff
-        //console.log(parsedLine+";"+last);
-        //last=point;
-        return 'a'+"\n";
-    },
-    function(a){//callback
-        //console.log(a)
-        var i=0;
-        do{
-            
-            table1[i]=(table1[i]+table1[i+10]-2*10108)/2;
-            i++;
-        }while(i+10<table1.length);
-        saveTable('test2.txt',table1,function(){});
-    });
-    readAndRewrite("10s_hr.txt","test5.txt",
-    function(line){ //what to do
-        parsedLine=Number(line);
-        table1[table1.length]=parsedLine;
-        //console.log(parsedLine);
-        //index++;
-        //do some stuff
-        //console.log(parsedLine+";"+last);
-        //last=point;
-        return 'a'+"\n";
-    },
-    function(a){//callback
-        //console.log(a)
-        var i=0;
-        do{
-            
-            table1[i]=(table1[i]+table1[i+1]-2*10108)/2;
-            i++;
-        }while(i+10<table1.length);
-        saveTable('test2.txt',table1,function(){});
-    });
-    readAndRewrite("10s_hr.txt","test3.txt",
-    function(line){ //what to do
-        parsedLine=Number(line)-10108;
-       
-        //index++;
-        //do some stuff
-        //console.log(parsedLine+";"+last);
-        //last=point;
-        return parsedLine+'\n';
-    },
-    function(a){//callback
-        //console.log(a)
-        });
-        */
+    */
+    
     res.send('ok');
     
 });
