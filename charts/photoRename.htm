@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>svg</title>
+        <meta name="description" content="Interaktywny">
+        
+    </head>
+    <body onload="init()" ><style>
+        .full {width: 100%; height: 100%;}
+        .full {position: absolute; top: 0; left: 0;}
+        .container {
+            position: absolute;
+            top: 80px;
+            left: 80px;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #73AD21;
+            
+        }
+        .pointer {}
+        </style>
+        <script>
+            //var newDiv= new svgDiv('abc');
+            var files=[];
+            var pointer=0;
+           
+
+            function init(){
+                sendObj('data',{mode:'folder'},function(data){
+                    files=data.data;
+                    console.log(files);
+                });
+                /*
+                sendObj('data',{mode:'names'},function(data){
+                    var string="";
+                    for(var i=0;i<data.data.length;i++){
+                        string+=
+                        
+                    }
+                    files=data.data;
+                    console.log(files);
+                });
+                */
+            }
+            function addName(index){
+                document.getElementById('name').innerHTML=files[index];
+                
+            }
+            function applyImg(data){
+                var element = document.getElementById('photo')
+                element.getElementsByTagName("img")[0].src=data
+            }
+            function nextPhoto(){
+                //console.log(files[pointer]);
+                pointer++;
+                 sendObj('data',{mode:'img',params:files[pointer]},function(data){
+                    //files=data;
+                    applyImg('data:image/png;base64,'+data.data)
+                    addName(pointer);
+                    console.log(data);
+                })
+            }
+            /*
+            37 - left
+38 - up
+39 - right
+40 - down
+            
+            */
+
+            function beforePhoto(){
+                //console.log(files[pointer]);
+                if(pointer != 0)
+                    pointer--;
+                 sendObj('data',{mode:'img',params:files[pointer]},function(data){
+                    //files=data;
+                    applyImg('data:image/png;base64,'+data.data)
+                    
+                    addName(pointer);
+                    console.log(data);
+                     
+                })
+            }
+            function tutor(str){
+                var x = files[pointer].indexOf('_');
+                var y = files[pointer].indexOf('png');
+                var num = files[pointer].slice(x,y-x+2);
+                str=str+num+'.png';
+                 //str+='.png';
+                console.log(str);
+                var x= files.indexOf(str);
+                if(files.indexOf(str) == -1){
+                    sendObj('data',{mode:'rename',params:[files[pointer],str]},function(data){
+                    //files=data;
+                    //applyImg('data:image/png;base64,'+data.data)
+                    
+                    //addName(pointer);
+                    //console.log(data);
+                     
+                    })
+                    //console.log(files[pointer])
+                    files[pointer]=str;
+                    
+                    console.log('ok');
+                    document.getElementById('tokenCheck').value="";
+                }
+                else{
+                    console.log("err");
+                }
+             
+                
+            }
+            function renameImg(){
+                var str = document.getElementById('tokenCheck').value
+                str+='.png';
+                var x= files.indexOf(str);
+                if(files.indexOf(str) == -1){
+                    sendObj('data',{mode:'rename',params:[files[pointer],str]},function(data){
+                    //files=data;
+                    //applyImg('data:image/png;base64,'+data.data)
+                    
+                    //addName(pointer);
+                    //console.log(data);
+                     
+                })
+                    //console.log(files[pointer])
+                    files[pointer]=str;
+                    
+                    console.log('ok');
+                    document.getElementById('tokenCheck').value="";
+                }
+                else{
+                    console.log("err");
+                }
+                
+            }
+            document.onkeydown = function (e) {
+              e = e || window.event;
+              var x=e.which ;
+                   
+                if(x==39){
+                      nextPhoto();
+                }
+                else if(x==37){
+                    
+                  beforePhoto(); 
+                      console.log('rigt')
+                }
+                 
+                    //case 13 ://sendInput();
+                 else if(x==13){
+                     renameImg();
+                      console.log('ENTER'); //Your Code Here (13 is ascii code for 'ENTER')
+                 }                
+            }
+            function sendObj(url,json_obj,callback){
+                var http = new XMLHttpRequest();
+                //var url = "get_data";
+                var string_obj = JSON.stringify(json_obj);
+                   // console.log(string_obj);
+                http.open("POST", url, true);
+                http.setRequestHeader("Content-type", "application/json");
+                http.onreadystatechange = function() {//Call a function when the state changes.
+                    if(http.readyState == 4 && http.status == 200) {
+                        //console.log('resText',http.responseText);
+                        var res=JSON.parse(http.responseText);
+                        //console.log(res);
+                        //console.log('resText',res);
+                        callback(res);
+                    }
+                    else{console.log(http.status);}
+                }
+                http.send(string_obj);
+            }
+        </script>
+ 
+        <div class="full" id="full"  >
+            
+                  <div id='photo' clas='photo'src=''> <img src=""></div>
+                  <div id='name' src=''> </div>
+<div>
+            <button onclick="test()">hey</button>
+            <button onclick="nextPhoto()">next</button>
+            <button onclick="delate()">delete</button>
+            
+            <button onclick='tutor("jaszczur")'>jaszczur</button>
+            <button onclick='tutor("krupinsky")'>krupinsky</button>
+            <button onclick='tutor("gumol")'>gumol</button>
+            <button onclick='tutor("albert")'>albert</button>
+    
+            <input type="" name="token" id="tokenCheck" autocomplete="off" autofocus="autofocus" style="width: 94%" placeholder="">
+     </div>  
+     </div>
+    </body>
+</html>
