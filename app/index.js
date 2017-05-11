@@ -4,9 +4,8 @@ var express = require('express'),
 	bodyParser = require('body-parser'),
 	cookieParser = require('cookie-parser'),
 	request= require('request'),
-	MongoClient = require('mongodb').MongoClient,
-	compression = require('compression'),
-	helmet = require('helmet'),
+	//compression = require('compression'),
+	//helmet = require('helmet'),
 	mongo=require(__dirname+'/myModules/mongoFunctions.js'),
 	setTime = require(__dirname+'/myModules/setTime.js'),
 	mangeUsers = require(__dirname+'/myModules/manageUsers.js'),
@@ -36,8 +35,8 @@ app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false })); // for parsing
 app.use(cookieParser());
-app.use(compression()); //use gzip compression
-app.use(helmet()); //Set http headers to protect from eg. clickjacking
+//app.use(compression()); //use gzip compression
+//app.use(helmet()); //Set http headers to protect from eg. clickjacking
 
 //setting cookie on first login
 app.use(function (req, res, next) {
@@ -103,11 +102,13 @@ if (data.object === 'page') {
 		// Iterate over each messaging event
 		entry.messaging.forEach(function(event) {
 			if (event.message) {
+                //console.log(event);
+                //messenger.oneMesSend(event);
 				messenger.receivedMessage(event);
 			} else if (event.postback) {
 				messenger.receivedPostback(event);
 			} else {
-				console.log("Webhook received unknown event: ", event);
+				//console.log("Webhook received unknown event: ", event);
 			}
 		});
 	});
@@ -115,6 +116,9 @@ if (data.object === 'page') {
 	res.sendStatus(200);
 	}
 });
+setInterval(function(){
+    messenger.streamLoop();
+}, 1000*5); //now running once per 10 minutes
 
 app.post('/postCall',function(req,res){
     var reqCookie=req.cookies.cookieName;
@@ -160,42 +164,10 @@ app.get('/deredirect', function(req, res){
 });
 
 
-setInterval(function(){
-    time.tommorowIs();
-    myFunc.subs(time.displayTime(),function(y){
-        time.todayIs();
-        myFunc.subs(time.displayTime(),function(b){
-            time.theDayAfterTomorrowIs();
-            myFunc.subs(time.displayTime(),function(x){
-                console.log('downloaded changes');
-            });
-        });
-    });
-}, 1000*60*10); //now running once per 10 minutes
-
-setTimeout(function () {
-	time.tommorowIs();
-    myFunc.subs(time.displayTime(),function(y){
-        time.todayIs();
-        myFunc.subs(time.displayTime(),function(b){
-            time.theDayAfterTomorrowIs();
-            myFunc.subs(time.displayTime(),function(x){
-                console.log('downloaded changes');
-            });
-        });
-    });
-}, 1000); //download substitutions 1 second after start
 
 setTimeout(function(){
 	cookie.deleteOld();
 },1000*60*60*24*30); //remove cookies (session) after 30 days
 
-https.createServer(opts, app).listen(8088);
+https.createServer(opts, app).listen(9001);
 console.log('Started');
-
-function mongoTest(){
-	MongoClient.connect('mongodb://localhost:27017/test2', function(err, db) {
-		var collection = db.collection('substitutions');
-		collection.find({}).forEach(function(f){console.log("hi",f)});
-	});
-}
