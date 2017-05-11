@@ -1,0 +1,1 @@
+/Users/bartek/gitrepo/substitutions/myModules/madarComunication.js
