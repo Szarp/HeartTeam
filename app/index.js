@@ -13,12 +13,19 @@ var express = require('express'),
 	link = require(__dirname+'/myModules/fbLinks.js'),
 	config = require(__dirname+'/myModules/config'),
 	messenger = require(__dirname+'/myModules/messengerBot.js'),
+    svg = require(__dirname+'/myModules/svgCreator'),
 	myFunc = require(__dirname+'/myModules/zsoServerComunication.js');
 
 var app = express();
 var cookie = new session.sessionCreator();
 var sessionList = {};
 
+const testFolder = '/Users/bartek/gitrepo/HeartTeam/charts/data/';
+fs.readdir(testFolder, function(err, files){
+    fileList=files;
+ 
+});
+//console.log(config.databaseUrl);
 //set up certificates for HTTPS
 var opts = {
 	// Specify the key file for the server
@@ -47,7 +54,7 @@ app.use(function (req, res, next) {
         var randomNumber=Math.random().toString();
         randomNumber=randomNumber.substring(2,randomNumber.length);
         res.cookie('cookieName',randomNumber, { maxAge: 1000*60*60*24*30, httpOnly: true });
-        console.log('cookie created successfully');
+        //console.log('cookie created successfully');
     }
     else{
     // yes, cookie was already present
@@ -79,6 +86,37 @@ app.post('/login', function (req, res) {
     //check cookie or something
     console.log(login);
     res.redirect(login);
+});
+app.post('/data',function(req,res){
+    //var reqCookie=req.cookies.cookieName;
+    console.log(req.body);
+    if(req.body['mode']=='data'){
+        //console.log(req.body.name);
+        var pointer=0;
+        for(var i=0;i<fileList.length;i++){
+        if(req.body.name==fileList[i]) 
+            pointer=1;
+        }
+        if(pointer==1){
+            svg.svgToSend(req.body['name'],function(path){
+                //console.log(path);    
+                res.send(path);
+            });
+        }
+        else{res.send('err');}    
+    }
+    if(req.body['mode']=='folder'){
+        res.send({data:fileList});
+    }
+    if(req.body['mode']=='pulse'){
+        svg.pulseToSend(function(path){
+            res.send(path);
+        })
+    }
+});
+app.post('/dataflow', function (req, res) {
+    //console.log(req.body)
+    res.sendStatus(200);
 });
 
 app.get('/webhook', function(req, res) {
@@ -117,7 +155,7 @@ if (data.object === 'page') {
 	}
 });
 setInterval(function(){
-    messenger.streamLoop();
+   // messenger.streamLoop();
 }, 1000*5); //now running once per 10 minutes
 
 app.post('/postCall',function(req,res){

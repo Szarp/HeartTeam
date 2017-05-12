@@ -1,20 +1,10 @@
 var settings1 = {};
-//var settings2={};
+var settings2={};
 var set=new traslateSettings();
 //var z = new translateChanges();
 var clssList=[];
 
-var patternOfDisplay = [
-    'typ',
-    'klasa',
-    'grupa',
-    'lekcja',
-    'przedmiot',
-    'nauczyciel',
-    'sala',
-    'komentarz',
-    'rodzaj'
-]
+
 var btnEvents ={
     saveBtn:function(){takeValuesFromForm()},
     tommorowBtn:function(){requestForChanges('tommorow')},
@@ -146,7 +136,7 @@ function takeValuesFromForm(){
     //console.log('hi');
     var form={};
     form['setClass'] = document.getElementById('setClass').value;
-    form['notification'] = document.getElementById('setNotification').value;
+    //form['notification'] = document.getElementById('setNotification').value;
     var url = 'postCall';
     form['mode'] = 'saveSettings';
     //console.log(form);
@@ -210,19 +200,18 @@ function onLoadFunc(){
     var form={};
     form['mode']='getSettings';
     sendObj(url,form,function(obj){
-    //    console.log(JSON.parse(obj));
-        settings1 = obj;
-       // console.log('hi',settings1);
+        //console.log(JSON.parse(obj));
+        settings1 = obj.params;
+        console.log('hi',settings1);
         set.saveData(settings1.event);
-    set.addChangeClick();
-    set.addClicks();
+        set.addChangeClick();
+        set.addClicks();
         //z.setFields(settings1['fields']);
         //z.setClassName(settings1.formValues[0]);
     setValuesToForm(settings1['formValues'])
-    getPicture();
-        //set.saveData(settings1);
-    //requestForChanges('today'); 
+    //getPicture();
     });
+    init();
 	if('serviceWorker' in navigator){
 		navigator.serviceWorker.register('/service-worker.js', {
 			scope: './'
@@ -295,6 +284,7 @@ function homePosition(id){
 function traslateSettings(){
     this.formId = 'setClass';
     this.saveData = function(data){
+        console.log(data);
         this.changeDisplayEvents = data['changeDisplayEvents'];
         this.btnEvents=btnEvents;
     }
