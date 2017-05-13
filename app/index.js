@@ -18,6 +18,8 @@ var express = require('express'),
 var app = express();
 var cookie = new session.sessionCreator();
 var sessionList = {};//cookies
+var fileList = {};
+const testFolder = '/Users/bartek/gitrepo/HeartTeam/charts/data/';
 
 //set up certificates for HTTPS
 var opts = {
@@ -31,39 +33,38 @@ var opts = {
 
 //set up express app
 var time = new setTime();
-app.all('*', setCookie);
+//app.all('*', setCookie);
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false })); // for parsing
 app.use(cookieParser());
 //app.use(compression()); //use gzip compression
 //app.use(helmet()); //Set http headers to protect from eg. clickjacking
+fs.readdir(testFolder, function(err, files){
+    fileList=files;
+ 
+});
 
 //setting cookie on first login
-
-
-function setCookie(req, res, next) {
+app.use(function (req, res, next) {
     var disabled=['/webhook','/dataflow','/login'];
-    //console.log();
-  if (disabled.indexOf(req.path) != -1) return next();
-
-  //authenticate user
+    if (disabled.indexOf(req.path) != -1) 
+        return next();
+    //check if client sent cookie
     var cookie = req.cookies.cookieName;
     if (cookie === undefined){
         // no: set a new cookie
         var randomNumber=Math.random().toString();
         randomNumber=randomNumber.substring(2,randomNumber.length);
-        res.cookie('cookieName',randomNumber, { maxAge: 1000*60*60*24*30, httpOnly: true });
+        res.cookie('cookieName',randomNumber, { maxAge: 1000*60*120, httpOnly: false });
         console.log('cookie created successfully');
-    }
+    } 
     else{
-    // yes, cookie was already present
+    // yes, cookie was already present 
         console.log('cookie exists', cookie);
-    }
-  next();
-}
-
-
+    } 
+    next(); // <-- important!
+});
 app.get('/login', function (req, res) {
     console.log('Asking for login');
     var login=link.loginAttempt('');
