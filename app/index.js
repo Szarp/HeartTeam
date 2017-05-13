@@ -13,19 +13,12 @@ var express = require('express'),
 	link = require(__dirname+'/myModules/fbLinks.js'),
 	config = require(__dirname+'/myModules/config'),
 	messenger = require(__dirname+'/myModules/messengerBot.js'),
-    svg = require(__dirname+'/myModules/svgCreator'),
-	myFunc = require(__dirname+'/myModules/zsoServerComunication.js');
+    svg = require(__dirname+'/myModules/svgCreator');
 
 var app = express();
 var cookie = new session.sessionCreator();
-var sessionList = {};
+var sessionList = {};//cookies
 
-const testFolder = '/Users/bartek/gitrepo/HeartTeam/charts/data/';
-fs.readdir(testFolder, function(err, files){
-    fileList=files;
- 
-});
-//console.log(config.databaseUrl);
 //set up certificates for HTTPS
 var opts = {
 	// Specify the key file for the server
@@ -38,6 +31,7 @@ var opts = {
 
 //set up express app
 var time = new setTime();
+app.all('*', setCookie);
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false })); // for parsing
@@ -46,22 +40,28 @@ app.use(cookieParser());
 //app.use(helmet()); //Set http headers to protect from eg. clickjacking
 
 //setting cookie on first login
-app.use(function (req, res, next) {
-  // check if client sent cookie
+
+
+function setCookie(req, res, next) {
+    var disabled=['/webhook','/dataflow','/login'];
+    //console.log();
+  if (disabled.indexOf(req.path) != -1) return next();
+
+  //authenticate user
     var cookie = req.cookies.cookieName;
     if (cookie === undefined){
         // no: set a new cookie
         var randomNumber=Math.random().toString();
         randomNumber=randomNumber.substring(2,randomNumber.length);
         res.cookie('cookieName',randomNumber, { maxAge: 1000*60*60*24*30, httpOnly: true });
-        //console.log('cookie created successfully');
+        console.log('cookie created successfully');
     }
     else{
     // yes, cookie was already present
         console.log('cookie exists', cookie);
     }
-    next(); // <-- important!
-});
+  next();
+}
 
 
 app.get('/login', function (req, res) {
