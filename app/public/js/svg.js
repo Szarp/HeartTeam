@@ -37,7 +37,11 @@ function divAndSvg(id, params) {
     //console.log(y.firstChild);
     //el.innerHTML+=string;
     var x = document.getElementById(id);
-    console.log('x', x)
+    setTimeout(function(){
+    allParents(x,x,0,0)    
+    },500);
+    
+    //console.log('x', x)
     var n = svgIndex;
     x.addEventListener('click', function() {
         getMousePosition(n)
@@ -108,11 +112,11 @@ var dataTest = {
             */
 function applyToSvg(self) {
     //var div = document.getElementById(id);
-    console.log('a', self)
+    //console.log('a', self)
     var divData = self.dataset;
     var svg = self.getElementsByTagName('svg')[0];
     //svg=svg[0];
-    console.log(svg);
+    //console.log(svg);
     var viewPos = Number(divData.min_x) + ' ' + Number(divData.min_y) + ' ' + Number(divData.width) + ' ' + Number(divData.height);
     console.log('view', viewPos);
     console.log(divData["size_x"]);
@@ -130,10 +134,16 @@ function svgByDivId(id) {
     return el.getElementsByTagName('svg')[0];
 }
 function init() {
+    var names=['t_1.txt','t_2.txt','t_3.txt','t_4.txt']
+    //names.forEach(function(a){
+    //    div(a);     
+    //})
+    
+    
     divAndSvg('abc', {
         min_x: - 100,
         min_y: 10000,
-        size_x: 1000,
+        size_x: 300,
         size_y: 300,
         width: 1000,
         height: 2000,
@@ -145,8 +155,44 @@ function init() {
     prepare(svg);
     uploadPath('1.txt', 'abc', {
         stroke: 'green',
+        "fill-opacity":"0.4",
         fill: 'none'
     })
+    /*
+    uploadPath(names[2], 'abc', {
+        stroke: 'blue',
+        "fill-opacity":"0.4",
+        fill: 'none'
+    })
+    uploadPath(names[1], 'abc', {
+        stroke: 'red',
+        "fill-opacity":"0.4",
+        fill: 'none'
+    })
+    */
+}
+    
+    function div(fileName){
+          divAndSvg(fileName, {
+        min_x: - 100,
+        min_y: 10000,
+        size_x: 1000,
+        size_y: 150,
+        width: 1000,
+        height: 2000,
+        pad_y: 0
+    });
+    var svg = document.getElementById(fileName);
+    //console.log('svg',svg);
+    applyToSvg(svg);
+    prepare(svg);
+    uploadPath(fileName, fileName, {
+        stroke: 'green',
+        fill: 'none'
+    })  
+        
+    }
+    
     //uploadPath('1_test.txt','abc',{stroke:'purple',fill:'none'})
     //  uploadPath('1_test1.txt','abc',{stroke:'orange',fill:'none'})
     //    uploadPath('test.txt','abc',{stroke:'blue',fill:'none'})
@@ -162,7 +208,7 @@ function init() {
                     //var x=posInSvgScale();
                     //changePath();
                     */
-}
+
 function test() {
     divAndSvg('abcd', {
         min_x: - 100,
@@ -229,8 +275,13 @@ function changePath(self, path) {
     // console.log(x);
 }
 function posInSvgScale(self) {
-    var x = event.clientX;
-    var y = event.clientY;
+    //var rect = self.getBoundingClientRect();
+    //console.log('main',document.getElementById('mainContent').offsetTop);
+     //console.log('main',allParents(self,self,0,0));
+    //console.log(rect.top, rect.right)
+    var x = event.clientX 
+    var y = event.clientY 
+    console.log(x,y);
     var params = self.dataset;
     var xPos = (x - params.pad_x) * params.width / params.size_x + 1 * params.min_x;
     var yPos = (y - params.pad_y) * params.height / params.size_y + 1 * params.min_y;
@@ -238,6 +289,25 @@ function posInSvgScale(self) {
     //console.log(y,yPos);
     return [xPos, yPos];
 }
+function allParents(el,self,xx,yy){
+    
+    if(el.parentElement){
+        var x = el.parentElement.offsetTop;
+        var y = el.parentElement.offsetLeft;
+        //console.log(el.parentElement);
+        //console.log('is')
+        allParents(el.parentElement,self,xx+x,yy+y)
+    }
+    else{
+        var divData = self.dataset;
+        divData.pad_y =yy/2;
+        divData.pad_x =xx/2-20;
+    //self.style.left = divData.pad_x + "px";
+        //console.log(xx,yy)
+        //return [xx,yy];
+    }
+}
+
 
 function getMousePosition(n) {
     var self = document.getElementById('full').getElementsByTagName('div')[n];
@@ -248,33 +318,6 @@ function getMousePosition(n) {
     addElementToSvg(self, svgEl);
 
 }
-//prepareSpriral();
-/*
-                function prepareSpriral(){
-                    var string='M0 0';
-                    var points
-                    for(var i=0;i<100;i++){
-                        //console.log(i*Math.pi()/100);
-                        points=getSpiral(i*Math.PI/30);
-                        string+=' L'+points[0]+' '+points[1];
-                    }
-                    return '<path stroke="red" fill="none" d="'+string+'"/>'
-                }
-                function getSpiral(d){
-                    var theta =toDegrees(d); 
-                    //{\displaystyle r=a\cdot \varphi }	
-                    var a = 0.3,
-                        n = 1;
-                    var r = a * theta ^ (1/n)
-                    var x = r*Math.sin(theta);
-                    var y =r*Math.cos(theta);
-                    return [x,y];
-
-                }
-            function toDegrees (angle) {
-                return angle * (180 / Math.PI);
-            }
-*/
 function point(cx, cy) {
     return '<circle cx="' + cx + '" cy="' + cy + '" r="1" stroke="black" stroke-width="1" fill="red" />';
 }
@@ -419,7 +462,7 @@ function prepare(self) {
     applyToSvg(self);
 }
 function addElementToSvg(elem, whatToAdd) {
-    console.log(whatToAdd);
+    //console.log(whatToAdd);
     elem.getElementsByTagName('svg')[0].innerHTML += whatToAdd;
     //var elem=document.getElementById("svg");
     //elem          

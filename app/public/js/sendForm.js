@@ -116,7 +116,7 @@ function tokenValidation(mode){
 
 function setValuesToForm(params){
     console.log(params);
-    var formList=['setClass'];
+    var formList=['deviceList'];
     for(var i=0;i<params.length;i++){
         var sel = document.getElementById(formList[0]);
         console.log(sel)
@@ -135,13 +135,13 @@ function setValuesToForm(params){
 function takeValuesFromForm(){
     //console.log('hi');
     var form={};
-    form['setClass'] = document.getElementById('setClass').value;
+    form['setClass'] = document.getElementById('deviceList').value;
     //form['notification'] = document.getElementById('setNotification').value;
     var url = 'postCall';
     form['mode'] = 'saveSettings';
     //console.log(form);
-    z.setClassName(form.setClass);
-    z.displayData();
+    //z.setClassName(form.setClass);
+    //z.displayData();
     sendObj(url,form,function(obj){
         //var json = JSON.parse(obj); 
         console.log('saveSettings',obj);
@@ -195,13 +195,14 @@ function sendMessage(){
 	}
 }
 function onLoadFunc(){
-    //console.log('hi2');
+    console.log('sendForm');
     var url='postCall';
     var form={};
     form['mode']='getSettings';
     sendObj(url,form,function(obj){
         //console.log(JSON.parse(obj));
-        settings1 = obj.params;
+        console.log('obj',obj);
+        settings1 = obj;
         console.log('hi',settings1);
         set.saveData(settings1.event);
         set.addChangeClick();
@@ -209,13 +210,15 @@ function onLoadFunc(){
         //z.setFields(settings1['fields']);
         //z.setClassName(settings1.formValues[0]);
     setValuesToForm(settings1['formValues'])
-    //getPicture();
+    getPicture();
     });
+    applyDeviceList()
     init();
 	if('serviceWorker' in navigator){
 		navigator.serviceWorker.register('/service-worker.js', {
 			scope: './'
 		});
+        
     }
 	document.getElementById("tokenCheck").addEventListener('keypress', function (e) {
 		var key = e.which || e.keyCode;
@@ -224,6 +227,28 @@ function onLoadFunc(){
 		}
 	});
     //console.log(settings1);
+}
+
+function applyDeviceList(){
+    //var id='elementsList';
+    var id='deviceList';
+    var el=document.getElementById(id);
+    var ul=el.getElementsByTagName('ul');
+    var string="";
+    sendObj('hr',{mode:'device'},function(obj){
+        var li=obj;
+        console.log('hr',li);
+        for(var i=0;i<li.length;i++){
+            //string+='<li>'+li[i]+'</li>'
+            string+='<option value="'+li[i]+'">'+li[i]+'</option>'
+        }
+        //string+="</ul>"
+        //console.log(string);
+        el.innerHTML=string;
+        
+    })
+    
+    
 }
 
 

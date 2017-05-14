@@ -38,6 +38,33 @@
             
         }
         .pointer {}
+    
+    .scrollableList ul{
+    list-style: outside none none;
+    text-align: left;
+    padding: 0px;
+    margin:0px;
+    width:auto;
+    height: 200px;
+    overflow: auto;
+}
+.scrollableList li{
+    color: #4078c0;
+     font-size: 14px;
+    font-weight: bold;
+    border-top: 1px solid #e5e5e5;
+    display: block;
+    font-size: 14px;
+    padding: 6px 64px 6px 30px;
+    position: relative;
+}
+.scrollableList li:hover{
+    color: black;
+}
+.scrollableList a{
+    color:rebeccapurple;
+}
+
         </style>
  
 
@@ -172,37 +199,20 @@
                           <tr>
                             <td>Device:</td>
                             <td>                        
-                                <select  id="setClass">
-                                    <option  value="">All</option>
-                                    <option  value="1ga">1ga</option>
-                                    <option  value="1gb">1gb</option>
-									<option  value="1gc">1gc</option>
-									<option  value="1gd">1gd</option>
-									<option  value="2ga">2ga</option>
-									<option  value="2gd">2gb</option>
-									<option  value="2gc">2gc</option>
-									<option  value="2gd">2gd</option>
-									<option  value="3ga">3ga</option>
-									<option  value="3gb">3gb</option>
-									<option  value="3gc">3gc</option>
-									<option  value="3gd">3gd</option>
-									<option  value="1a">1a</option>
-                                    <option  value="1b">1b</option>
-                                    <option  value="1c">1c</option>
-                                    <option  value="1d">1d</option>
-                                    <option  value="2a">2a</option>
-                                    <option  value="2b">2b</option>
-                                    <option  value="2c">2c</option>
-                                    <option  value="2d">2d</option>
-                                    <option  value="3a">3a</option>
-                                    <option  value="3b">3b</option>
-                                    <option  value="3c">3c</option>
-                                    <option  value="3d">3d</option>
+                                <select style="width: 240px;" id="deviceList">
+                                    
                                 </select>
+                            </td>
+                          </tr> 
+                            <tr>
+                            
+                            <td>                        
+                                <a id="saveBtn" class="edit-btn btn" onclick="">Zapisz</a>
                             </td>
                           </tr>
                         </table>
-                        <a id="saveBtn" class="edit-btn btn" onclick="">Zapisz</a>
+                        
+                        
                     </div>
      
 
