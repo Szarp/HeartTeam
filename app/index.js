@@ -19,6 +19,24 @@ var app = express();
 var cookie = new session.sessionCreator();
 var sessionList = {};//cookies
 var fileList = {};
+var deviceList= [ '00000000',
+'hx711 00190000',
+'T - mmax zewą 00002200',
+'T - mmax 2 00210001',
+'T - Biurko A1 00170302',
+'T - WC A5 0017031F',
+'T - temp A8 00170383',
+'T - Podloga A9 001703FA',
+'T - Okno u E_R temp2 0017024C',
+'T - Sufit A4 00170485',
+'K - mc6553 00230000',
+'test 00130020',
+'T - Zielona antena 00170312',
+'T - Antena WiFi 001701ED',
+'P - Monitor 1 00220030',
+'P - Komputer2 00220031',
+'K - Drzwi lazienki 00230002'
+];
 const testFolder = '/Users/bartek/gitrepo/HeartTeam/charts/data/';
 
 //set up certificates for HTTPS
@@ -116,7 +134,14 @@ app.post('/data',function(req,res){
     }
 });
 app.post('/dataflow', function (req, res) {
-    //console.log(req.body)
+    //console.log('ok');
+    var x = req.body.connection;
+    console.log(req.body.time)
+    for(var i=0;i<x.length;i++){
+        deviceList[i]=x[i].name +' '+x[i].MAC
+        //console.log(x[i].name,x[i].MAC)
+    }
+    //console.log(req.body.connection)
     res.sendStatus(200);
 });
 
@@ -173,6 +198,20 @@ app.post('/postCall',function(req,res){
 			res.send(JSON.stringify({err:false,message:"",params:resText}));
 		}
 	})
+})
+app.post('/hr',function(req,res){
+    var reqCookie=req.cookies.cookieName;
+    var userId=cookie.findIfSessionExist(reqCookie);
+    console.log('user session: ',userId);
+    console.log('Mode: '+req.body['mode']);
+    console.log('user session: ',userId);
+	if(req['mode']=='device'){
+        res.send(JSON.stringify({err:false,message:"",params:deviceList}))
+    }
+    else{
+        //res.send('no');
+        res.send(JSON.stringify({err:false,message:"",params:deviceList}))
+    }
 })
 
 app.get('/redirect', function(req, res){
