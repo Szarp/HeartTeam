@@ -13,7 +13,8 @@ var express = require('express'),
 	link = require(__dirname+'/myModules/fbLinks.js'),
 	config = require(__dirname+'/myModules/config'),
 	messenger = require(__dirname+'/myModules/messengerBot.js'),
-    svg = require(__dirname+'/myModules/svgCreator');
+	madar = require(__dirname+'/myModules/madarComunication.js'),
+    svg = require(__dirname+'/myModules/svgCreator.js');
 
 var app = express();
 var cookie = new session.sessionCreator();
@@ -106,6 +107,21 @@ app.post('/login', function (req, res) {
     console.log(login);
     res.redirect(login);
 });
+
+function MeasureForm(){
+    var x =new Date().getTime();
+return  {
+        name:'bartek',
+        pass:'6eaiLmzne6LMWNPY7YL66Q==',
+        report:'measure',
+        mac:'001703FA',
+        fromtime:x-60*60*1000*15,
+        tilltime:x,
+        param:3,
+        raster:4
+    };
+}
+
 app.post('/data',function(req,res){
     //var reqCookie=req.cookies.cookieName;
     console.log(req.body);
@@ -136,7 +152,7 @@ app.post('/data',function(req,res){
 app.post('/dataflow', function (req, res) {
     //console.log('ok');
     var x = req.body.connection;
-    console.log(req.body.time)
+    //console.log(req.body.time)
     for(var i=0;i<x.length;i++){
         deviceList[i]=x[i].name +' '+x[i].MAC
         //console.log(x[i].name,x[i].MAC)
@@ -145,44 +161,9 @@ app.post('/dataflow', function (req, res) {
     res.sendStatus(200);
 });
 
-app.get('/webhook', function(req, res) {
-	if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === config.webhookToken) {
-		console.log("Validating webhook");
-		res.status(200).send(req.query['hub.challenge']);
-	} else {
-		console.error("Failed validation. Make sure the validation tokens match.");
-		res.sendStatus(403);
-	}
-});
-
-app.post('/webhook', function (req, res) {
-var data = req.body;
-// Make sure this is a page subscription
-if (data.object === 'page') {
-	// Iterate over each entry - there may be multiple if batched
-	data.entry.forEach(function(entry) {
-		var pageID = entry.id;
-		var timeOfEvent = entry.time;
-		// Iterate over each messaging event
-		entry.messaging.forEach(function(event) {
-			if (event.message) {
-                //console.log(event);
-                //messenger.oneMesSend(event);
-				messenger.receivedMessage(event);
-			} else if (event.postback) {
-				messenger.receivedPostback(event);
-			} else {
-				//console.log("Webhook received unknown event: ", event);
-			}
-		});
-	});
-	//send 200 within 20s to inform Facebook that message was received successfully
-	res.sendStatus(200);
-	}
-});
 setInterval(function(){
-   // messenger.streamLoop();
-}, 1000*5); //now running once per 10 minutes
+    messenger.streamLoop();
+}, 1000*12); //now running once per 10 minutes
 
 app.post('/postCall',function(req,res){
     var reqCookie=req.cookies.cookieName;
@@ -202,15 +183,34 @@ app.post('/postCall',function(req,res){
 app.post('/hr',function(req,res){
     var reqCookie=req.cookies.cookieName;
     var userId=cookie.findIfSessionExist(reqCookie);
-    console.log('user session: ',userId);
-    console.log('Mode: '+req.body['mode']);
-    console.log('user session: ',userId);
-	if(req['mode']=='device'){
+    //console.log('user session: ',userId);
+    console.log('hr: '+req.body['mode']);
+    //console.log('user session: ',userId);
+	if(req.body['mode'] == 'device'){
+        //console.log('im here');
         res.send(JSON.stringify({err:false,message:"",params:deviceList}))
     }
+    else if(req.body['mode'] == 'dataPeriod'){
+        var rast = req.body['raster'];
+        //var MAC = req.body['params'].raster;
+        var par = MeasureForm()
+        par.raster=rast;
+        //console.log('im here');
+        madar.values('0017009E',par,function(q){
+            //console.log(q);
+            svg.svgFromTab(q,function(x){
+                res.send(x);
+                //console.log(x);
+            })
+            
+            
+        })
+        //res.send(JSON.stringify({err:false,message:"",params:deviceList}))
+    }
+    //else
     else{
         //res.send('no');
-        res.send(JSON.stringify({err:false,message:"",params:deviceList}))
+        //res.send(JSON.stringify({err:false,message:"",params:deviceList}))
     }
 })
 
@@ -247,5 +247,45 @@ setTimeout(function(){
 	cookie.deleteOld();
 },1000*60*60*24*30); //remove cookies (session) after 30 days
 
+
+app.get('/webhook', function(req, res) {
+	if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === config.webhookToken) {
+		console.log("Validating webhook");
+		res.status(200).send(req.query['hub.challenge']);
+	} else {
+		console.error("Failed validation. Make sure the validation tokens match.");
+		res.sendStatus(403);
+	}
+});
+
+app.post('/webhook', function (req, res) {
+var data = req.body;
+// Make sure this is a page subscription
+if (data.object === 'page') {
+	// Iterate over each entry - there may be multiple if batched
+	data.entry.forEach(function(entry) {
+		var pageID = entry.id;
+		var timeOfEvent = entry.time;
+		// Iterate over each messaging event
+		entry.messaging.forEach(function(event) {
+			if (event.message) {
+                //console.log(event);
+                //messenger.oneMesSend(event);
+				messenger.receivedMessage(event);
+			} else if (event.postback) {
+				messenger.receivedPostback(event);
+			} else {
+				//console.log("Webhook received unknown event: ", event);
+			}
+		});
+	});
+	//send 200 within 20s to inform Facebook that message was received successfully
+	res.sendStatus(200);
+	}
+});
+
+
 https.createServer(opts, app).listen(9001);
 console.log('Started');
+
+

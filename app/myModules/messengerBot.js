@@ -8,24 +8,59 @@ var mesTemp = require('./textTemplates.js')
 var mongo = require('./mongoFunctions.js');
 var adm1 = config.adm1;
 var adm2 = config.adm2;
-var allClasses = ["1a","1b","1c","1d","2a","2b","2c","2d","3a","3b","3c","3d","1ga","1gb","1gc","1gd","2ga","2gb","2gc","2gd","3ga","3gb","3gc","3gd"];
 
 var streamList={}
 
 
-function sendPulse(senderID){
-    var pulse={
-        value:[15,24],
-        time:['1 January 1970 00:00:00 UTC','1 January 1970 00:00:00 UTC']
+//console.log(pulseInput());
+
+
+
+//console.log(mesTemp.hrHelpPageMessage('1'));
+function pulseInput(){
+    var time=fourTimes();
+    var value=[];
+    for (var i=0;i<4;i++){
+        value[i]=pulseValue();
     }
+    return {
+        value:value,
+        time:time
+    } 
+}
+
+function fourTimes(){
+    var x = new Date();
+    var time=[];
+    var y;
+    for(var i=0;i<4;i++){
+        y = new Date(x-i*3*1000) 
+        time[3-i]=pulseTime(y);
+        //console.log(pulseTime(y));
+    }
+    return time;
+}
+
+function pulseTime(y){
+    //var y = new Date();
+    //console.log(y.toUTCString());
+    return ""+y.getHours()+":"+y.getMinutes()+":"+y.getSeconds();
+}
+
+function pulseValue(){
+    return Math.floor(Math.random()*(70-50+1)+50);
+}
+
+
+function sendPulse(pulse,senderID){
     callSendAPI(mesTemp.pulseMessage(senderID,pulse));
 }
 function streamLoop(){
-    console.log(streamList);
+    //console.log(streamList);
     for(k in streamList){
         if(streamList[k].stream==true){
             console.log('Person '+k+' is streaming');
-            sendPulse(k);
+            sendPulse(pulseInput(),k);
         }
     }
 }
@@ -88,8 +123,6 @@ function commandAndParam(message,callback){
                 buff[buff.length]=i;
             }
         }
-        //console.log(buff);
-        //for(var i=0;i<buff.length;i++){
         if(buff.length==2){
             var AT=message.slice(0,buff[0]);
             var param=message.slice(buff[0]+1,buff[1]);
@@ -156,27 +189,36 @@ function receivedMessage(event) {
     var what = commandAndParam(message);
     var text=""
     if(what.AT=="0"){
-        var pulse={
-            value:[15,24,12],
-            time:['1 January 1970 00:00:00 UTC','1 January 1970 00:00:00 UTC','1 January 1970 00:00:00 UTC']
-        }
-        callSendAPI(mesTemp.pulseMessage(senderID,pulse));
-    }
-    else if(what.AT=="1"){
-        text="brak na jutro"
+        //device list
+        mongo.findByParam({'personal.id':senderID},{"personal.settings":1},'person',function(doc){
+            //console.log(doc)
+            if(doc){
+                text="Your device: "+doc[0].personal.settings.setClass;
+            }
+            else{
+                text='Conenct acconts or see deflaut device: 00000000'
+            }
+          
+        
         createMessage('text', senderID, text, function(messageTS){
             callSendAPI(messageTS);
         });
+        })
         
     }
-    else if(what.AT=="2"){
-        streamList[id]={
-        "stream":true
-    }    
-        text="nie skontaktujemy się"
-        createMessage('text', senderID, text, function(messageTS){
-            callSendAPI(messageTS);
-        });
+    else if(what.AT =='4'){
+        console.log(what.param)
+        if (what.param == ''){
+            secretToken.messRequest(senderID, function(token){
+					var txt = 'Wygenerowany token wipsz na domek.emadar.eu po zalogowaniu i kliknięciu własnego zdjęcia profilowego w polu "Sprawdź token"\nTwój token to: ' + token;
+					createMessage('text', senderID, txt, function(messageTS){
+						callSendAPI(messageTS);
+					});
+            })
+        }
+        else {
+            connectToken(senderID,what.param);
+        }
     }
     else if(what.AT=="stream"){
         if(what.param=='start'){
@@ -185,9 +227,15 @@ function receivedMessage(event) {
         if(what.param=='stop'){
             streamList[senderID]={"stream":false}
         }
+        else{
+            text="Did you mead start or stop?"
+            createMessage('text', senderID, text, function(messageTS){
+                callSendAPI(messageTS);
+            });
+        }
     }
     else{
-        callSendAPI(mesTemp.helpPageMessage(senderID)); 
+        callSendAPI(mesTemp.hrHelpPageMessage(senderID)); 
     }
         //console.log(what)
 }
