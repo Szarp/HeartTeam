@@ -18,9 +18,9 @@ var streamList={}
 
 //console.log(mesTemp.hrHelpPageMessage('1'));
 function pulseInput(){
-    var time=fourTimes();
+    var time=manyTimes(2);
     var value=[];
-    for (var i=0;i<4;i++){
+    for (var i=0;i<time.length;i++){
         value[i]=pulseValue();
     }
     return {
@@ -29,13 +29,14 @@ function pulseInput(){
     } 
 }
 
-function fourTimes(){
+function manyTimes(times){
+    //var times=2;
     var x = new Date();
     var time=[];
     var y;
-    for(var i=0;i<4;i++){
-        y = new Date(x-i*3*1000) 
-        time[3-i]=pulseTime(y);
+    for(var i=0;i<times;i++){
+        y = new Date(times-i*3*1000) 
+        time[times-1-i]=pulseTime(y);
         //console.log(pulseTime(y));
     }
     return time;
@@ -72,7 +73,7 @@ function createMessage(type, id, content, callback){
 		  id: id
 		}
 	};
-	console.log(content);
+	//console.log(content);
 	if(type == 'text'){
 		message['message']={text: content};
 	}else{
@@ -116,6 +117,7 @@ function createButtons(tab, callback){
 //commandAndParam("Ala ma kota","");
 function commandAndParam(message,callback){
     message=message+' ';
+    message = message.toLowerCase() 
     var buff=[];
         for(var i=0;i<message.length;i++){
             
@@ -192,11 +194,15 @@ function receivedMessage(event) {
         //device list
         mongo.findByParam({'personal.id':senderID},{"personal.settings":1},'person',function(doc){
             //console.log(doc)
-            if(doc){
-                text="Your device: "+doc[0].personal.settings.setClass;
+            if(doc.length != 0){
+                console.log(doc);
+                var set = doc[0];
+                var device = set.personal.settings.setClass;
+                
+                text="Your device: "+device;
             }
             else{
-                text='Conenct acconts or see deflaut device: 00000000'
+                text='Connect accounts or see default device: 00000000'
             }
           
         
@@ -207,10 +213,10 @@ function receivedMessage(event) {
         
     }
     else if(what.AT =='4'){
-        console.log(what.param)
+        //console.log(what.param)
         if (what.param == ''){
             secretToken.messRequest(senderID, function(token){
-					var txt = 'Wygenerowany token wipsz na domek.emadar.eu po zalogowaniu i kliknięciu własnego zdjęcia profilowego w polu "Sprawdź token"\nTwój token to: ' + token;
+					var txt = 'Wygenerowany token wipsz na domek.emadar.eu:9001 po zalogowaniu i kliknięciu własnego zdjęcia profilowego w polu "Sprawdź token"\nTwój token to: ' + token;
 					createMessage('text', senderID, txt, function(messageTS){
 						callSendAPI(messageTS);
 					});
@@ -224,11 +230,11 @@ function receivedMessage(event) {
         if(what.param=='start'){
         streamList[senderID]={"stream":true}
         }
-        if(what.param=='stop'){
+        else if(what.param=='stop'){
             streamList[senderID]={"stream":false}
         }
         else{
-            text="Did you mead start or stop?"
+            text='Did you mean "stream start" or "stream stop"?';
             createMessage('text', senderID, text, function(messageTS){
                 callSendAPI(messageTS);
             });
