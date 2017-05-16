@@ -163,7 +163,7 @@ app.post('/dataflow', function (req, res) {
 
 setInterval(function(){
     messenger.streamLoop();
-}, 1000*12); //now running once per 10 minutes
+}, 1000*6); //now running once per 10 minutes
 
 app.post('/postCall',function(req,res){
     var reqCookie=req.cookies.cookieName;
@@ -193,6 +193,7 @@ app.post('/hr',function(req,res){
     else if(req.body['mode'] == 'dataPeriod'){
         var rast = req.body['raster'];
         //var MAC = req.body['params'].raster;
+        /*
         var par = MeasureForm()
         par.raster=rast;
         //console.log('im here');
@@ -202,9 +203,9 @@ app.post('/hr',function(req,res){
                 res.send(x);
                 //console.log(x);
             })
+          
             
-            
-        })
+        })*/
         //res.send(JSON.stringify({err:false,message:"",params:deviceList}))
     }
     //else
