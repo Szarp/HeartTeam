@@ -38,8 +38,8 @@ function divAndSvg(id, params) {
     //el.innerHTML+=string;
     var x = document.getElementById(id);
     setTimeout(function(){
-    allParents(x,x,0,0)    
-    },500);
+    allParents(x,x,0,0);   
+    },1000);
     
     //console.log('x', x)
     var n = svgIndex;
@@ -52,6 +52,36 @@ function divAndSvg(id, params) {
 
     svgIndex++;
 }
+function periodSvg(raster){
+    var style = {
+        stroke: 'green',
+        "fill-opacity":"0.4",
+        fill: 'none'
+    }
+    var id='abc';
+    //function uploadPath(txtFile, id, style) {
+    sendObj1('hr', {
+        mode: 'dataPeriod',
+        raster: raster
+    }, function(obj) {
+        //console.log(obj);
+        //changePath('line2',obj['data']);
+        var el = document.getElementById(id)
+        //console.log(obj.viewBox);
+        var x = applyViewBox(el, obj.viewBox);
+        //console.log('x', x);
+        el = document.getElementById(id);
+        console.log(el);
+        //(el)
+        //applyToSvg(el);
+        prepare(el);
+        createPath(svgByDivId(id), obj.path, style);
+    });
+
+}
+    
+
+
 function applyViewBox(self, viewBox) {
     var divData = self.dataset;
     console.log(divData);
@@ -143,7 +173,6 @@ function init() {
     divAndSvg('abc', {
         min_x: - 100,
         min_y: 10000,
-        size_x: 300,
         size_y: 300,
         width: 1000,
         height: 2000,
@@ -153,23 +182,9 @@ function init() {
     //console.log('svg',svg);
     applyToSvg(svg);
     prepare(svg);
-    uploadPath('1.txt', 'abc', {
-        stroke: 'green',
-        "fill-opacity":"0.4",
-        fill: 'none'
-    })
-    /*
-    uploadPath(names[2], 'abc', {
-        stroke: 'blue',
-        "fill-opacity":"0.4",
-        fill: 'none'
-    })
-    uploadPath(names[1], 'abc', {
-        stroke: 'red',
-        "fill-opacity":"0.4",
-        fill: 'none'
-    })
-    */
+    
+    
+    
 }
     
     function div(fileName){
@@ -371,17 +386,29 @@ function grids(svg) {
     var points_x = [],
     points_y = [],
     all = [],
-    steps = 10;
+    steps = 10,
+    labelEl="";
     var location_x = viewBox.min_x * 1;
     var location_y = viewBox.min_y * 1;
-    console.log(location_x, location_y)
+    //console.log(location_x, location_y)
     for (var i = 0; i <= 10; i++) {
         //console.log(points_x[0]);
-        points_x[i] = [[location_x, i / steps * viewBox.height * 1 + 5 + viewBox.min_y * 1], [location_x + 5, i / 10 * viewBox.height + 5 * 1 + viewBox.min_y * 1]];
+        points_y[i] = [[location_x, i / steps * viewBox.height * 1 + 5 + viewBox.min_y * 1], [location_x + 5, i / 10 * viewBox.height + 5 * 1 + viewBox.min_y * 1]];
+        
+        if(i==9 || i==1)
+        labelEl+=label(points_y[i][1][0],points_y[i][1][1],Math.floor(i / 10 * (viewBox.height*1)));
+        if(i==10){
+            //console.log(points_x[i]);
+            
+            //points_x[i] = [[location_x, viewBox.height * 1 + 10 + viewBox.min_y * 1]];
+        
+            
+            
+        }
         //points_x[i][0]=location_x;
     }
     for (var i = 0; i <= 10; i++) {
-        points_y[i] = [[i / 10 * viewBox.width * 1 + viewBox.min_x * 1 + 5, location_y], [i / 10 * viewBox.width * 1 + viewBox.min_x * 1 + 5, location_y + 5]];
+        points_x[i] = [[i / 10 * viewBox.width * 1 + viewBox.min_x * 1 + 5, location_y], [i / 10 * viewBox.width * 1 + viewBox.min_x * 1 + 5, location_y + 5]];
         //points_y[i][1]=location_y;
     }
     //console.log(points_x,points_y);
@@ -394,10 +421,13 @@ function grids(svg) {
     all = all.concat(points_y);
     all = all.concat(line);
     //all=all.concat(line_y);
-    addElementToSvg(svg, makeLines(all));
+    addElementToSvg(svg, makeLines(all)+labelEl);
 }
 //makeLines(x);
 
+function label(x,y,text){
+    return '<text   class="grid" x="'+x+'" y="'+y+'" fill="red">'+text+'</text>';
+}
 function makeLines(tab) {
     var string = ""
     var actual = []

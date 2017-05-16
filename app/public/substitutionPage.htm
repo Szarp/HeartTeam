@@ -45,7 +45,7 @@
     padding: 0px;
     margin:0px;
     width:auto;
-    height: 200px;
+    height: 200px; 
     overflow: auto;
 }
 .scrollableList li{
@@ -64,6 +64,12 @@
 .scrollableList a{
     color:rebeccapurple;
 }
+    .home-logo{
+        background: url(img/icon192.png) no-repeat center center; 
+        height: 200px; 
+        width: 200px;
+        margin: auto;
+    }
 
         </style>
  
@@ -87,7 +93,7 @@
 </ul>
 	<div id="msgArea"></div>
 	<div class="flex-container nowrap mainContentSize" id="mainContent" >
-        <div class="" id="substitutionList"   >
+        <div class="" id="substitutionList" style="display:none;"  >
             <div  class="item-size  boxed-group" id="elementsContent">
                     <h3>Wykres</h3>
                     <div class="boxed-group-inner" style="padding:0px; ">
@@ -100,35 +106,7 @@
                             </ul>
                         </div>
                          <div id="forDay">
-                            miejsce na nazwę
-                        </div>
-                         <div class="allClasses" id="forClasses" style="white-space: normal">
-                            Klasy ze zmianami: 
-							<div class="className" id="1a">1a</div>
-							<div class="className" id="1b">1b</div>
-							<div class="className" id="1c">1c</div>
-							<div class="className" id="1d">1d</div>
-							<div class="className" id="2a">2a</div>
-							<div class="className" id="2b">2b</div>
-							<div class="className" id="2c">2c</div>
-							<div class="className" id="2d">2d</div>
-							<div class="className" id="3a">3a</div>
-							<div class="className" id="3b">3b</div>
-							<div class="className" id="3c">3c</div>
-							<div class="className" id="3d">3d</div>
-							<div class="className" id="1ga">1ga</div>
-							<div class="className" id="1gb">1gb</div>
-							<div class="className" id="1gc">1gc</div>
-							<div class="className" id="1gd">1gd</div>
-							<div class="className" id="2ga">2ga</div>
-							<div class="className" id="2gb">2gb</div>
-							<div class="className" id="2gc">2gc</div>
-							<div class="className" id="2gd">2gd</div>
-							<div class="className" id="3ga">3ga</div>
-							<div class="className" id="3gb">3gb</div>
-							<div class="className" id="3gc">3gc</div>
-							<div class="className" id="3gd">3gd</div>
-							
+                            Miejsce na wykres (faza testow)
                         </div>
                         <div class="scrollableList" id='full'>
                         
@@ -138,16 +116,34 @@
                     </div>
                 </div>
         </div>
-        <div id="homePage" class="" style="display:none;">
-            <div  class="boxed-group" >
+        <div id="homePage" class="" >
+            <div  class="boxed-group item-size" >
                     <h3>Home</h3>
                     <div class="boxed-group-inner" style="text-align: justify;">
-                     Aplikacja do wyświetlania bierzących pomiarow. Aplikacja w fazie testowej, więc mogą występować błędy. Zachęcam do podzielenia się nimi, aby umożliwić ich naprawę.
-                        <div  id=""><textarea id="messageArea" maxlength="1000" style="resize: none; width: 99%;" placeholder="Tu wpisz wiadomość"></textarea>  </div>
-                        <a id="sendMessage" class="edit-btn btn" onclick="sendMessage()">Wyślij</a>
+                     Aplikacja HeartTeam komunikuje się z użądzeniami IoT i umożliwia komunikację z nimi.
+                        <div class="home-logo"></div>
 
+                         <div class="chooseDay" style="margin-top:30px; border-top:1px solid black" id=''>
+                        Techonologie:
+                             <ul>
+                                 <li class="" id="" ><a href="/git_help.html"><img alt="GitHub" src="/img/GitHub-Mark-64px.png" type="image/png" width="50px"></img></a></li>
+                                <li class="" id="" ><a href="/mes.html"><img alt="GitHub" src="/img/mes_icon.png" type="image/png" width="50px" ></img></a></li>
+                                
+
+                            </ul>
+                            <ul>
+                                
+                                <li class="" id="" ><a href="/fb_help.html"><img alt="GitHub" src="/img/f_icon.png" type="image/png" width="50px"></img></a></li>
+                                <li class="" id="" ><a href="http://metium.pl" rel="noopener" target="_blank" style="padding: 10px; padding-top: 12px"><img alt="Metium" src="/img/mes-logo.png" type="image/png" width="100px"></img></a></li>
+
+                            </ul>
+                            
+                        
+                            
+                        </div>
                     </div>
                     
+               
                 </div>
 
         </div>        
@@ -158,7 +154,7 @@
                     <div class="boxed-group-section first" >
                         <table>
                             <tr>
-                                <td> Moduł słożący do łączenia konta z Messengerem </td>
+                                <td><h3>Validacja tokenow </h3> </td>
                             </tr>
                           <!--<tr>
                             <td>                         
@@ -169,8 +165,8 @@
 
                           </tr>-->
                             
-                            <tr>
-                                <td> Generuj Token: </td>
+                            <tr style="padding-bottom:8px;">
+                                <td > Generuj Token: </td>
                                 <td id="tknField"></td>
                                 <td class="btn" id="generateBtn" >Generuj</td>
                                 

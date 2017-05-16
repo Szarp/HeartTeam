@@ -7,8 +7,8 @@ var clssList=[];
 
 var btnEvents ={
     saveBtn:function(){takeValuesFromForm()},
-    tommorowBtn:function(){requestForChanges('tommorow')},
-    todayBtn:function(){requestForChanges('today')},
+    tommorowBtn:function(){periodSvg('5')},
+    todayBtn:function(){periodSvg('6')},
     generateBtn:function(){tokenValidation('generateToken')},
     checkBtn:function(){tokenValidation('checkToken')}
 }
@@ -194,6 +194,7 @@ function sendMessage(){
 		msgArea.appendChild(insert);
 	}
 }
+var xx;
 function onLoadFunc(){
     console.log('sendForm');
     var url='postCall';
@@ -201,7 +202,7 @@ function onLoadFunc(){
     form['mode']='getSettings';
     sendObj(url,form,function(obj){
         //console.log(JSON.parse(obj));
-        console.log('obj',obj);
+        //console.log('obj',obj);
         settings1 = obj;
         console.log('hi',settings1);
         set.saveData(settings1.event);
@@ -209,10 +210,12 @@ function onLoadFunc(){
         set.addClicks();
         //z.setFields(settings1['fields']);
         //z.setClassName(settings1.formValues[0]);
-    setValuesToForm(settings1['formValues'])
+    
     getPicture();
+    applyDeviceList(settings1['formValues']);
     });
-    applyDeviceList()
+    
+    
     init();
 	if('serviceWorker' in navigator){
 		navigator.serviceWorker.register('/service-worker.js', {
@@ -229,7 +232,7 @@ function onLoadFunc(){
     //console.log(settings1);
 }
 
-function applyDeviceList(){
+function applyDeviceList(set){
     //var id='elementsList';
     var id='deviceList';
     var el=document.getElementById(id);
@@ -245,6 +248,7 @@ function applyDeviceList(){
         //string+="</ul>"
         //console.log(string);
         el.innerHTML=string;
+        setValuesToForm(set);
         
     })
     
