@@ -144,14 +144,14 @@ function commandAndParam(message,callback){
 function connectToken(senderId,tkn){
     tkn = parseInt(tkn);
 	console.log("Token received: " + tkn);
-	secretToken.messCheck(senderID, tkn, function(res){
+	secretToken.messCheck(senderId, tkn, function(res){
 		if(res){
-			createMessage('text', senderID, 'Konto zostało połączone. (y)', function(messageTS){
+			createMessage('text', senderId, 'Konto zostało połączone. (y)', function(messageTS){
 				callSendAPI(messageTS);
 			});
 		}
         else {
-			createMessage('text', senderID, 'Wystąpił błąd. Spróbuj jeszcze raz.', function(messageTS){
+			createMessage('text', senderId, 'Wystąpił błąd. Spróbuj jeszcze raz.', function(messageTS){
 		          callSendAPI(messageTS);
             });
         }
